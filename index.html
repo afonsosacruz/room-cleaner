@@ -103,6 +103,11 @@
       padding: 5px;
       border-radius: 4px;
     }
+    /* Placeholder styling for empty editable items */
+    .room-part-text:empty:before {
+      content: "New Room Part";
+      color: #ccc;
+    }
     
     /* Delete button for list item */
     .list-delete-btn {
@@ -302,6 +307,13 @@
         span.textContent = part;
         span.className = 'room-part-text';
         span.contentEditable = "true";
+        // Add keydown listener to add new item on Enter key
+        span.addEventListener('keydown', function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addRoomPart();
+          }
+        });
 
         // Create a delete button for the room part
         const delBtn = document.createElement('button');
@@ -334,15 +346,21 @@
         .filter(part => part !== '');
     }
 
-    // Add a new room part item at the end of the list
+    // Add a new room part item at the end of the list (with an empty editable span)
     function addRoomPart() {
       const li = document.createElement('li');
 
-      // Create an editable span with default text
+      // Create an empty editable span (will show placeholder via CSS if empty)
       const span = document.createElement('span');
-      span.textContent = "New Room Part";
+      span.textContent = "";
       span.className = 'room-part-text';
       span.contentEditable = "true";
+      span.addEventListener('keydown', function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          addRoomPart();
+        }
+      });
 
       // Create a delete button for this item
       const delBtn = document.createElement('button');
