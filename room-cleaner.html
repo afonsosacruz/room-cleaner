@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Random Room Cleaning Assigner</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff0f5; /* Light pink background */
+      color: #4a4a4a;
+    }
+    
+    .container {
+      background-color: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(219, 112, 147, 0.2);
+      border: 2px solid #ffd1dc;
+    }
+    
+    h1 {
+      color: #db7093;
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+    
+    .task-display {
+      margin: 30px 0;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffeef2;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #c71585;
+      border: 1px solid #ffccd5;
+    }
+    
+    .button-container {
+      display: flex;
+      justify-content: center;
+    }
+    
+    button {
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      box-shadow: 0 3px 10px rgba(219, 112, 147, 0.3);
+      margin: 5px;
+    }
+    
+    button:hover {
+      background-color: #db7093;
+    }
+    
+    /* Smaller buttons for save and add */
+    .small-btn {
+      padding: 8px 15px;
+      font-size: 14px;
+      border-radius: 20px;
+      margin: 3px;
+    }
+    
+    .settings {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #ffccd5;
+    }
+    
+    /* Room parts list styling without bullets */
+    #roomPartsListDisplay {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 15px;
+    }
+    
+    #roomPartsListDisplay li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px dotted #ffccd5;
+    }
+    
+    /* Editable text inside list item */
+    .room-part-text {
+      flex-grow: 1;
+      outline: 1px dashed #ffccd5;
+      padding: 5px;
+      border-radius: 4px;
+    }
+    
+    /* Delete button for list item */
+    .list-delete-btn {
+      background-color: #ff4d6d;
+      border: none;
+      color: white;
+      cursor: pointer;
+      margin-left: 10px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    
+    .list-delete-btn:hover {
+      background-color: #ff3377;
+    }
+    
+    .settings-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .history {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #ffeef2;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ffccd5;
+    }
+    
+    .history h3 {
+      margin-top: 0;
+      color: #c71585;
+    }
+    
+    .history-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #ffccd5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .history-item:last-child {
+      border-bottom: none;
+    }
+    
+    .delete-btn {
+      background-color: #ff4d6d;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-left: 10px;
+      padding: 0;
+      box-shadow: 0 2px 5px rgba(219, 112, 147, 0.3);
+    }
+    
+    .delete-btn:hover {
+      background-color: #ff3377;
+    }
+    
+    h3 {
+      color: #db7093;
+    }
+    
+    .history-text {
+      flex-grow: 1;
+    }
+    
+    /* Clear history button positioned outside the history scrollable area */
+    .clear-all-btn {
+      background-color: #ff5c8d;
+      padding: 8px 15px;
+      font-size: 14px;
+      margin-top: 10px;
+      display: block;
+      width: 100%;
+      text-align: center;
+    }
+    
+    @media (max-width: 500px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+      }
+      
+      button {
+        padding: 12px 20px;
+        font-size: 16px;
+      }
+    }
+    
+    .info-section {
+      background-color: #ffeef2;
+      border: 1px solid #ffccd5;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 30px;
+      font-size: 0.8em; /* Smaller letters for info text */
+    }
+    
+    .info-section h3 {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Random Room Cleaning Assigner</h1>
+    
+    <div class="task-display" id="taskDisplay">
+      Your task will appear here
+    </div>
+    
+    <div class="button-container">
+      <button id="assignButton">Assign Me a Task</button>
+    </div>
+    
+    <div class="history">
+      <h3>Previous Assignments</h3>
+      <div id="historyContainer">
+        <div class="history-item">
+          <span class="history-text">No tasks assigned yet</span>
+        </div>
+      </div>
+    </div>
+    <!-- Clear History button placed outside the history scrollable area -->
+    <button class="clear-all-btn small-btn" id="clearHistoryButton">Clear All History</button>
+    
+    <div class="settings">
+      <h3>Room Parts to Clean</h3>
+      <p>Add, modify, or remove the room parts below. Click on the text to edit it:</p>
+      <ul id="roomPartsListDisplay"></ul>
+      <div class="settings-buttons">
+        <button class="small-btn" id="addButton">Add Room Part</button>
+        <button class="save-btn small-btn" id="saveButton">Save List</button>
+      </div>
+    </div>
+    
+    <div class="info-section">
+      <h3>How Data Is Saved</h3>
+      <p>
+        This app saves your data in your browser's local storage. This means:
+      </p>
+      <ul>
+        <li>Your room parts list and history are saved only on <strong>this device</strong> in <strong>this browser</strong>.</li>
+        <li>When you click "Save List", your customized room parts are stored in your browser.</li>
+        <li>Tasks are automatically added to history when assigned.</li>
+        <li>You can delete completed tasks using the X button.</li>
+        <li>If you use a different device or browser, you'll start with fresh data.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // DOM elements
+    const taskDisplay = document.getElementById('taskDisplay');
+    const assignButton = document.getElementById('assignButton');
+    const saveButton = document.getElementById('saveButton');
+    const addButton = document.getElementById('addButton');
+    const historyContainer = document.getElementById('historyContainer');
+    const clearHistoryButton = document.getElementById('clearHistoryButton');
+    const roomPartsListDisplay = document.getElementById('roomPartsListDisplay');
+
+    // Load room parts from local storage (starts empty if none exist)
+    function loadRoomParts() {
+      const savedParts = localStorage.getItem('roomParts');
+      let partsArray = [];
+      if (savedParts) {
+        partsArray = savedParts.split('\n').map(part => part.trim()).filter(part => part !== '');
+      }
+      renderRoomParts(partsArray);
+    }
+
+    // Render room parts in the <ul> without bullets
+    function renderRoomParts(partsArray) {
+      roomPartsListDisplay.innerHTML = '';
+      partsArray.forEach(part => {
+        const li = document.createElement('li');
+
+        // Create an editable span for the room part text
+        const span = document.createElement('span');
+        span.textContent = part;
+        span.className = 'room-part-text';
+        span.contentEditable = "true";
+
+        // Create a delete button for the room part
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '✕';
+        delBtn.className = 'list-delete-btn';
+        delBtn.contentEditable = "false";
+        delBtn.addEventListener('click', () => {
+          li.remove();
+        });
+
+        li.appendChild(span);
+        li.appendChild(delBtn);
+        roomPartsListDisplay.appendChild(li);
+      });
+    }
+
+    // Save room parts to local storage (reads from the list items)
+    function saveRoomParts() {
+      const partsArray = Array.from(roomPartsListDisplay.children)
+        .map(li => li.querySelector('.room-part-text').textContent.trim())
+        .filter(part => part !== '');
+      localStorage.setItem('roomParts', partsArray.join('\n'));
+      alert('Room parts list saved successfully!');
+    }
+
+    // Get array of room parts from the list (<li> elements)
+    function getRoomPartsArray() {
+      return Array.from(roomPartsListDisplay.children)
+        .map(li => li.querySelector('.room-part-text').textContent.trim())
+        .filter(part => part !== '');
+    }
+
+    // Add a new room part item at the end of the list
+    function addRoomPart() {
+      const li = document.createElement('li');
+
+      // Create an editable span with default text
+      const span = document.createElement('span');
+      span.textContent = "New Room Part";
+      span.className = 'room-part-text';
+      span.contentEditable = "true";
+
+      // Create a delete button for this item
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '✕';
+      delBtn.className = 'list-delete-btn';
+      delBtn.contentEditable = "false";
+      delBtn.addEventListener('click', () => {
+        li.remove();
+      });
+
+      li.appendChild(span);
+      li.appendChild(delBtn);
+      roomPartsListDisplay.appendChild(li);
+      span.focus();
+    }
+
+    // Assign a random task (excluding tasks already in history)
+    function assignRandomTask() {
+      const roomParts = getRoomPartsArray();
+      if (roomParts.length === 0) {
+        taskDisplay.textContent = 'Please add room parts to the list!';
+        return;
+      }
+      
+      // Extract tasks from history (assumes format "time, date: task")
+      const historyTasks = Array.from(historyContainer.children)
+        .map(item => {
+          const text = item.querySelector('.history-text').textContent;
+          return text.includes(': ') ? text.split(': ')[1].trim() : "";
+        })
+        .filter(task => task !== "");
+
+      // Filter available tasks
+      const availableTasks = roomParts.filter(task => !historyTasks.includes(task));
+      
+      if (availableTasks.length === 0) {
+        taskDisplay.textContent = 'All tasks have already been assigned!';
+        return;
+      }
+      
+      const randomIndex = Math.floor(Math.random() * availableTasks.length);
+      const randomTask = availableTasks[randomIndex];
+      
+      taskDisplay.textContent = randomTask;
+      addToHistory(randomTask);
+    }
+
+    // Add task to history and update local storage
+    function addToHistory(task) {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      const dateString = now.toLocaleDateString();
+      const taskText = `${timeString}, ${dateString}: ${task}`;
+      
+      // Remove default message if it exists
+      if (historyContainer.firstChild &&
+          historyContainer.firstChild.querySelector('.history-text').textContent === 'No tasks assigned yet') {
+        historyContainer.removeChild(historyContainer.firstChild);
+      }
+      
+      const historyItem = document.createElement('div');
+      historyItem.className = 'history-item';
+      
+      const textSpan = document.createElement('span');
+      textSpan.className = 'history-text';
+      textSpan.textContent = taskText;
+      
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'delete-btn';
+      deleteButton.textContent = '✕';
+      deleteButton.addEventListener('click', function() {
+        historyContainer.removeChild(historyItem);
+        saveHistory();
+        if (historyContainer.children.length === 0) {
+          const emptyItem = document.createElement('div');
+          emptyItem.className = 'history-item';
+          const emptyText = document.createElement('span');
+          emptyText.className = 'history-text';
+          emptyText.textContent = 'No tasks assigned yet';
+          emptyItem.appendChild(emptyText);
+          historyContainer.appendChild(emptyItem);
+        }
+      });
+      
+      historyItem.appendChild(textSpan);
+      historyItem.appendChild(deleteButton);
+      historyContainer.insertBefore(historyItem, historyContainer.firstChild);
+      saveHistory();
+    }
+
+    // Save history to local storage
+    function saveHistory() {
+      const historyItems = Array.from(historyContainer.children)
+        .map(item => item.querySelector('.history-text').textContent)
+        .filter(text => text !== 'No tasks assigned yet');
+      localStorage.setItem('taskHistory', JSON.stringify(historyItems));
+    }
+
+    // Load history from local storage
+    function loadHistory() {
+      historyContainer.innerHTML = ''; // clear container first
+      const savedHistory = localStorage.getItem('taskHistory');
+      if (savedHistory) {
+        const historyItems = JSON.parse(savedHistory);
+        if (historyItems.length > 0) {
+          historyItems.forEach(item => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            const textSpan = document.createElement('span');
+            textSpan.className = 'history-text';
+            textSpan.textContent = item;
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-btn';
+            deleteButton.textContent = '✕';
+            deleteButton.addEventListener('click', function() {
+              historyContainer.removeChild(historyItem);
+              saveHistory();
+              if (historyContainer.children.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'history-item';
+                const emptyText = document.createElement('span');
+                emptyText.className = 'history-text';
+                emptyText.textContent = 'No tasks assigned yet';
+                emptyItem.appendChild(emptyText);
+                historyContainer.appendChild(emptyItem);
+              }
+            });
+            historyItem.appendChild(textSpan);
+            historyItem.appendChild(deleteButton);
+            historyContainer.appendChild(historyItem);
+          });
+        }
+      }
+      // If no history exists, show default message
+      if (historyContainer.children.length === 0) {
+        const emptyItem = document.createElement('div');
+        emptyItem.className = 'history-item';
+        const emptyText = document.createElement('span');
+        emptyText.className = 'history-text';
+        emptyText.textContent = 'No tasks assigned yet';
+        emptyItem.appendChild(emptyText);
+        historyContainer.appendChild(emptyItem);
+      }
+    }
+
+    // Clear all history
+    function clearAllHistory() {
+      if (confirm('Are you sure you want to clear all history?')) {
+        historyContainer.innerHTML = '';
+        const emptyItem = document.createElement('div');
+        emptyItem.className = 'history-item';
+        const emptyText = document.createElement('span');
+        emptyText.className = 'history-text';
+        emptyText.textContent = 'No tasks assigned yet';
+        emptyItem.appendChild(emptyText);
+        historyContainer.appendChild(emptyItem);
+        localStorage.removeItem('taskHistory');
+      }
+    }
+
+    // Event listeners
+    assignButton.addEventListener('click', assignRandomTask);
+    saveButton.addEventListener('click', saveRoomParts);
+    addButton.addEventListener('click', addRoomPart);
+    clearHistoryButton.addEventListener('click', clearAllHistory);
+
+    // Initial setup
+    loadRoomParts();
+    loadHistory();
+  </script>
+</body>
+</html>
